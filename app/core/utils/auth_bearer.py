@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-from typing import Union, Any
 
 from fastapi import HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
+from pydantic import UUID4
+
 from app.core.config import settings
 
 SECRET_KEY = settings.JWT_SECRET_KEY
@@ -15,28 +16,28 @@ REFRESH_TOKEN_EXPIRE_MINUTES = settings.REFRESH_TOKEN_EXPIRE_MINUTES
 class AccessToken:
 
     @staticmethod
-    def get_encoded_token(subject, expire_minutes):
-        to_encode = {"exp": expire_minutes, "sub": str(subject)}
+    def get_encoded_token(user_id: UUID4, expire_minutes):
+        to_encode = {"exp": expire_minutes, "user_id": str(user_id)}
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
         return encoded_jwt
 
     @staticmethod
-    def create_access_token(subject: Union[str, Any]) -> str:
+    def create_access_token(user_id: UUID4):
         expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        return AccessToken.get_encoded_token(subject=subject, expire_minutes=expires_delta)
+        return AccessToken.get_encoded_token(user_id=user_id, expire_minutes=expires_delta)
 
     @staticmethod
-    def create_refresh_token(subject: Union[str, Any]) -> str:
+    def create_refresh_token(user_id: UUID4):
         expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
-        return AccessToken.get_encoded_token(subject=subject, expire_minutes=expires_delta)
+        return AccessToken.get_encoded_token(user_id=user_id, expire_minutes=expires_delta)
 
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
-    def __call__(self, request: Request):
-        credentials: HTTPAuthorizationCredentials = super(JWTBearer, self).__call__(request)
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
