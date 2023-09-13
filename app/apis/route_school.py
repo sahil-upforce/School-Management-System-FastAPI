@@ -1,0 +1,48 @@
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import UUID4
+from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse
+
+from app.db.session import get_db
+from app.schemas.school import SchoolCreateSchema, SchoolSchema, SchoolUpdateSchema
+from app.services.school import SchoolService
+
+school_router = APIRouter()
+
+
+@school_router.post(path="/", response_model=SchoolSchema)
+def create_school(school: SchoolCreateSchema, db: Session = Depends(get_db)):
+    school = SchoolService.create(school_schema=school, db=db)
+    return school
+
+
+@school_router.get(path="/", response_model=List[SchoolSchema])
+def fetch_all_schools(db: Session = Depends(get_db)):
+    schools = SchoolService.fetch_all(db=db)
+    return schools
+
+
+@school_router.get(path="/{school_id}", response_model=SchoolSchema)
+def get_school_details(school_id: UUID4, db: Session = Depends(get_db)):
+    school = SchoolService.get_school(school_id=school_id, db=db)
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+    return school
+
+
+@school_router.put(path="/{school_id}", response_model=SchoolSchema)
+def update_school(school_id: UUID4, school: SchoolUpdateSchema, db: Session = Depends(get_db)):
+    school = SchoolService.update_school(school_id=school_id, school_schema=school, db=db)
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+    return school
+
+
+@school_router.delete(path="/{school_id}")
+def delete_school(school_id: UUID4, db: Session = Depends(get_db)):
+    school = SchoolService.delete_school(school_id=school_id, db=db)
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+    return JSONResponse(content={"detail": f"School {school.id} is deleted"}, status_code=200)
