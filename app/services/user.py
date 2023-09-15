@@ -7,7 +7,6 @@ from app.schemas.user import UserCreateSchema
 
 
 class UserService:
-
     @staticmethod
     def create(user_schema: UserCreateSchema, db: Session):
         user_schema.password = Hasher.get_password_hash(user_schema.password)

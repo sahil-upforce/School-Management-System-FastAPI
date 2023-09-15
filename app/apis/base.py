@@ -8,4 +8,6 @@ api_router = APIRouter()
 
 api_router.include_router(router=school_router, prefix="/schools", tags=["School"])
 api_router.include_router(router=user_router, prefix="/user", tags=["User"])
-api_router.include_router(router=authentication_router, prefix="/authentication", tags=["Authentication"])
+api_router.include_router(
+    router=authentication_router, prefix="/authentication", tags=["Authentication"]
+)

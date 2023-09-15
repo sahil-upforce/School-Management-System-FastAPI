@@ -10,7 +10,6 @@ from app.schemas.authentication import LoginSchema
 
 
 class LoginService:
-
     @staticmethod
     def login(credentials: LoginSchema, db: Session):
         data = credentials.model_dump()
@@ -18,11 +17,17 @@ class LoginService:
         if not user:
             raise ValueError("Invalid email")
 
-        if not Hasher.verify_password(plain_password=data.get("password"), hashed_password=user.password):
+        if not Hasher.verify_password(
+            plain_password=data.get("password"), hashed_password=user.password
+        ):
             raise ValueError("Invalid password")
 
         access_token = AccessToken.create_access_token(user_id=user.id)
         refresh_token = AccessToken.create_refresh_token(user_id=user.id)
-        token_create_data = {"access_token": access_token, "refresh_token": refresh_token, "user_id": user.id}
+        token_create_data = {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "user_id": user.id,
+        }
         token = TokenManager.create(model=Token, data=token_create_data, db=db)
         return token

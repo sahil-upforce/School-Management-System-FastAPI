@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, UUID4, field_validator
+from pydantic import UUID4, BaseModel, EmailStr, field_validator
 
 from app.db.models.user import User
 

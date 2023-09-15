@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.utils.auth_bearer import jwt_bearer
 from app.db.session import get_db
-from app.schemas.authentication import TokenSchema, LoginSchema
+from app.schemas.authentication import LoginSchema, TokenSchema
 from app.services.authentication import LoginService
 
 authentication_router = APIRouter()

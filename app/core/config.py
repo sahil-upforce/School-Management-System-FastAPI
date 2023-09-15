@@ -15,7 +15,9 @@ def load_env_files():
     elif prod_env_path.is_file():
         load_dotenv(dotenv_path=prod_env_path)
     else:
-        raise FileNotFoundError("Please add .env.local or .env.prod file and get reference from .env.example file")
+        raise FileNotFoundError(
+            "Please add .env.local or .env.prod file and get reference from .env.example file"
+        )
 
 
 class Settings:
@@ -31,7 +33,9 @@ class Settings:
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "POSTGRES_USER")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "POSTGRES_PASSWORD")
     POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "POSTGRES_SERVER")
-    POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", 5432)  # default postgres port is 5432
+    POSTGRES_PORT: str = os.getenv(
+        "POSTGRES_PORT", 5432
+    )  # default postgres port is 5432
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "POSTGRES_DB")
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
 

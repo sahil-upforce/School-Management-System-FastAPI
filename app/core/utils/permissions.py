@@ -6,7 +6,6 @@ from app.db.managers.user_manager import UserManager
 
 
 class PermissionChecker:
-
     def __init__(self, required_permissions: list[str]) -> None:
         self.required_permissions = required_permissions
 
@@ -15,6 +14,6 @@ class PermissionChecker:
             if r_perm not in UserManager.get_user_permissions(user):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail='Permissions denied'
+                    detail="Permissions denied",
                 )
         return True

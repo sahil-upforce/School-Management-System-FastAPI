@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 
 
 class BaseManager:
-
     @staticmethod
     def create(model, data, db: Session):
         obj = model(**data)
@@ -17,11 +16,15 @@ class BaseManager:
 
     @staticmethod
     def get_by_id(model, obj_id, db: Session):
-        return db.query(model).filter(model.id == obj_id, model.is_active == True).first()
+        return (
+            db.query(model).filter(model.id == obj_id, model.is_active == True).first()
+        )
 
     @staticmethod
     def update(model, obj_id, data, db: Session):
-        obj = db.query(model).filter(model.id == obj_id, model.is_active == True).first()
+        obj = (
+            db.query(model).filter(model.id == obj_id, model.is_active == True).first()
+        )
         if obj:
             for key, value in data.items():
                 setattr(obj, key, value)
@@ -32,7 +35,9 @@ class BaseManager:
 
     @staticmethod
     def delete_by_id(model, obj_id, db: Session):
-        obj = db.query(model).filter(model.id == obj_id, model.is_active == True).first()
+        obj = (
+            db.query(model).filter(model.id == obj_id, model.is_active == True).first()
+        )
         if obj:
             setattr(obj, "is_active", False)
             db.commit()
