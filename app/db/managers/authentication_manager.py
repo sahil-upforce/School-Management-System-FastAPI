@@ -23,7 +23,6 @@ class TokenManager(BaseManager):
 class PermissionManager:
     @staticmethod
     def create(data: dict, db):
-        breakpoint()
         obj = Permission(**data)
         db.add(obj)
         db.commit()
