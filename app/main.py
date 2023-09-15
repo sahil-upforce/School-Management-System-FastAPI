@@ -15,7 +15,11 @@ def create_tables():
 
 
 def start_application():
-    app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION, debug=settings.DEBUG)
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.PROJECT_VERSION,
+        debug=settings.DEBUG,
+    )
     include_router(app)
     create_tables()
     return app

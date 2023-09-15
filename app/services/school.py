@@ -7,10 +7,11 @@ from app.schemas.school import SchoolCreateSchema, SchoolUpdateSchema
 
 
 class SchoolService:
-
     @staticmethod
     def create(school_schema: SchoolCreateSchema, db: Session):
-        school = BaseManager.create(model=School, data=school_schema.model_dump(), db=db)
+        school = BaseManager.create(
+            model=School, data=school_schema.model_dump(), db=db
+        )
         return school
 
     @staticmethod
@@ -25,7 +26,9 @@ class SchoolService:
 
     @staticmethod
     def update_school(school_id: UUID4, school_schema: SchoolUpdateSchema, db: Session):
-        school = BaseManager.update(model=School, obj_id=school_id, data=school_schema.model_dump(), db=db)
+        school = BaseManager.update(
+            model=School, obj_id=school_id, data=school_schema.model_dump(), db=db
+        )
         return school
 
     @staticmethod
