@@ -1,11 +1,17 @@
 from datetime import datetime, timedelta
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from pydantic import UUID4
+from sqlalchemy.orm import Session
+from starlette import status
 
 from app.core.config import settings
+from app.db.managers.user_manager import UserManager
+from app.db.models.user import User
+from app.db.session import get_db
+
 
 SECRET_KEY = settings.JWT_SECRET_KEY
 ALGORITHM = settings.JWT_ALGORITHM
@@ -23,12 +29,12 @@ class AccessToken:
 
     @staticmethod
     def create_access_token(user_id: UUID4):
-        expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.utcnow() + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
         return AccessToken.get_encoded_token(user_id=user_id, expire_minutes=expires_delta)
 
     @staticmethod
     def create_refresh_token(user_id: UUID4):
-        expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.utcnow() + timedelta(minutes=int(REFRESH_TOKEN_EXPIRE_MINUTES))
         return AccessToken.get_encoded_token(user_id=user_id, expire_minutes=expires_delta)
 
 
@@ -40,23 +46,21 @@ class JWTBearer(HTTPBearer):
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
-                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
-            if not self.verify_jwt(credentials.credentials):
-                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
-            return credentials.credentials
+                raise HTTPException(status_code=403, detail="Invalid authentication scheme")
+            payload = self.verify_jwt(credentials.credentials)
+            if not payload:
+                raise HTTPException(status_code=403, detail="Invalid token or expired token")
         else:
-            raise HTTPException(status_code=403, detail="Invalid authorization code.")
+            raise HTTPException(status_code=403, detail="Invalid authorization code")
+        return credentials.credentials
 
     @staticmethod
-    def verify_jwt(jwt_token: str) -> bool:
-        is_token_valid: bool = False
+    def verify_jwt(jwt_token: str):
         try:
             payload = JWTBearer.decode_jwt(jwt_token)
         except Exception as e:
             payload = None
-        if payload:
-            is_token_valid = True
-        return is_token_valid
+        return payload
 
     @staticmethod
     def decode_jwt(jwt_token: str):
@@ -68,3 +72,18 @@ class JWTBearer(HTTPBearer):
 
 
 jwt_bearer = JWTBearer()
+
+
+def get_current_user_from_token(token: str = Depends(jwt_bearer), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+    )
+    payload = JWTBearer.decode_jwt(jwt_token=token)
+    user_id: str = payload.get("user_id")
+    if user_id is None:
+        raise credentials_exception
+    user = UserManager.get_by_id(model=User, obj_id=user_id, db=db)
+    if user is None:
+        raise credentials_exception
+    return user
