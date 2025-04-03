@@ -1,3 +1,4 @@
+from fastadmin import fastapi_app as admin_app
 from fastapi import FastAPI
 
 from app.apis.base import api_router
@@ -6,8 +7,9 @@ from app.db.base import Base
 from app.db.session import engine
 
 
-def include_router(app):
-    app.include_router(api_router)
+def include_router(fastapi_app):
+    fastapi_app.mount("/admin", admin_app)
+    fastapi_app.include_router(api_router)
 
 
 def create_tables():
@@ -15,14 +17,14 @@ def create_tables():
 
 
 def start_application():
-    app = FastAPI(
+    fastapi_app = FastAPI(
         title=settings.PROJECT_NAME,
         version=settings.PROJECT_VERSION,
         debug=settings.DEBUG,
     )
-    include_router(app)
+    include_router(fastapi_app)
     create_tables()
-    return app
+    return fastapi_app
 
 
 app = start_application()

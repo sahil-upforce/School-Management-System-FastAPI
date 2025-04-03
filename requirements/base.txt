@@ -1,9 +1,8 @@
-fastapi==0.103.1
-SQLAlchemy==2.0.20
-uvicorn==0.23.2
-python-dotenv==1.0.0
+fastapi==0.115.12
+SQLAlchemy==2.0.40
+uvicorn==0.34.0
+python-dotenv==1.1.0
 passlib[bcrypt]==1.7.4
-pydantic[email]
-python-jose==3.3.0
-psycopg2-binary==2.9.7
-pre-commit==3.4.0
+pydantic[email]==2.11.1
+python-jose==3.4.0
+psycopg-binary==3.2.6
